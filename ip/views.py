@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Visitor
+from .models import Visitor, Image
+from django.core.exceptions import ObjectDoesNotExist
 import json
 
 def get_client_ip(request):
@@ -13,9 +14,13 @@ def get_client_ip(request):
     return ip
 
 def photo_view(request):
+    try:
+        image = Image.objects.latest("id")
+    except ObjectDoesNotExist:
+        image = None
     # просто рендерим страницу, без записи в базу
     ip = get_client_ip(request)
-    return render(request, "photo.html", {"ip": ip})
+    return render(request, "photo.html", locals())
 
 @csrf_exempt
 def save_location(request):
